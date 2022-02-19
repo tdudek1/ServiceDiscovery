@@ -1,0 +1,24 @@
+- hosts: server*
+  become: true
+  
+  vars:
+    dotnet_package: dotnet-sdk-6.0
+    dotnet_key: https://packages.microsoft.com/config/centos/7/packages-microsoft-prod.rpm
+  roles:
+  - role: geerlingguy.docker  
+  tasks:
+  - name: install microsoft keys
+    yum:
+      name: '{{dotnet_key}}'
+      state: present
+  - name: install 
+    yum:
+      name: '{{dotnet_package}}'
+      state: present 
+  - name: build app
+    shell: dotnet publish -c Release -o /vagrant/out /vagrant/Api/Api.csproj      
+  - name: build docker
+    docker_image:
+      build:
+        path: /vagrant
+      name: api
